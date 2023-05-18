@@ -1,6 +1,9 @@
-const TELEGRAM_BOT_TOKEN = "6140449523:AAFtb3y1PR1WnihdP6_c6ExWUBTLlhxWhVk";
+// const TELEGRAM_BOT_TOKEN = "6140449523:AAFtb3y1PR1WnihdP6_c6ExWUBTLlhxWhVk";
 
 const TeleBot = require("telebot");
+require('dotenv').config()
+const TELEGRAM_BOT_TOKEN = process.env.TOKEN
+
 const bot = new TeleBot(TELEGRAM_BOT_TOKEN);
 
 // bot.on("text", (msg) => {

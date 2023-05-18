@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev" : "node index.js"
+    "dev": "node index.js"
   },
   "keywords": [
     "bot",
@@ -15,6 +15,7 @@
   "author": "Valisher Botirov",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.0.3",
     "telebot": "^1.4.1"
   }
 }
