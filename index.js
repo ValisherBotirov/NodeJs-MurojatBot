@@ -1,79 +1,79 @@
 // const TELEGRAM_BOT_TOKEN = "6140449523:AAFtb3y1PR1WnihdP6_c6ExWUBTLlhxWhVk";
 
+const { log } = require("console");
+const fs = require("fs");
+
 const TeleBot = require("telebot");
-require('dotenv').config()
+require("dotenv").config();
 // const TELEGRAM_BOT_TOKEN = process.env.TOKEN
-const TELEGRAM_BOT_TOKEN = "6140449523:AAFtb3y1PR1WnihdP6_c6ExWUBTLlhxWhVk"
+const TELEGRAM_BOT_TOKEN = "6140449523:AAFtb3y1PR1WnihdP6_c6ExWUBTLlhxWhVk";
 
 const bot = new TeleBot(TELEGRAM_BOT_TOKEN);
 
-// bot.on("text", (msg) => {
-//   msg.reply.text(
-//     "Assalomu alaykum Valisher Botirovning sahifasiga xush kelibsiz " + msg.text
-//   );
-// });
+const founderId = "1423191247";
 
-let users = [];
-const founderId = '1423191247'
-
-let clientId = null
-
-bot.on( ['/start'],(msg) => {
-  console.log(msg)
-  clientId = msg.chat.id
+bot.on(["/start"], (msg) => {
+  console.log(msg);
+  clientId = msg.chat.id;
   msg.reply.text(
-      `Salom @${msg.from.username}. Valisher Botirovning murojat botiga xush kelibsiz!`
+    `Assalomu alaykum @${msg.from.username}. Valisher Botirovning murojat botiga xush kelibsiz!`
   );
+
+  const allData = JSON.parse(fs.readFileSync("data.json", "utf-8"));
+  console.log(allData, "all user");
+
+  const user = {
+    userId: msg.chat.id,
+    messageId: msg.message_id,
+    userName: msg.chat.username,
+    user: msg.chat.first_name,
+  };
+
+  allData.push(user);
+
+  const jsonData = JSON.stringify(allData, null, 2); // Ob'ektni JSON ko'rinishiga o'girish
+  fs.writeFileSync("data.json", jsonData); // JSON faylga yozish
 });
 
-bot.on( 'text' ,(msg) => {
-  if(msg.text !== '/start' && msg.chat.id !== founderId){
-    msg.reply.text(
-        `Murojatingiz qabul qilindi!`
-    );
-  let text = `Sizga username @${msg.from.username}, ismi ${msg.chat.first_name} bo'lgan foydalanuvchi xabar yo'lladi.  \n \n \n ${msg.text}`
-  bot.sendMessage(founderId,text)
+bot.on("text", (msg) => {
+  console.log(msg.chat.id);
 
+  if (msg.chat.id == founderId) {
+    adminPanel(msg);
+  } else {
+    userPanel(msg);
   }
-  else if(msg.chat.id === founderId){
-    console.log("run is founder id")
-    bot.on('callbackQuery', (query) => {
-      console.log(query,"query")
-      const queryId = query.id;
-      const queryData = query.data;
-      // Queryga javob berish
-      const answerText = 'Sizning javobingiz: ' + queryData;
-
-    });
-  }
 });
 
-bot.on('callbackQuery', (query) => {
-  console.log(query,"query")
-  const queryId = query.id;
-  const queryData = query.data;
-  // Queryga javob berish
-  const answerText = 'Sizning javobingiz: ' + queryData;
+function adminPanel(msg) {
+  console.log(msg);
 
-});
+  const users = JSON.parse(fs.readFileSync("data.json", "utf-8"));
+  // console.log(msg.reply_to_message.message_id);
 
-// bot.on(["/stop"], (msg) => {
-//   let userId = msg.chat.id;
-//   users = users.filter((id) => id !== userId);
-//   // sendUserMessage();
-// });
-// console.log(users, "users");
+  users.forEach((user) => {
+    bot
+      .sendMessage(user.userId, msg.text)
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  });
+  // bot.sendMessage(
+  //   5844994207,
+  //   "Server bilan muommo yuz berdi. Eror | status code 500"
+  // );
+}
 
+function userPanel(msg) {
+  console.log("run is users");
+  console.log(msg);
+  let text = `Sizga username @${msg.from.username}, ismi ${msg.chat.first_name} bo'lgan foydalanuvchi xabar yo'lladi.  \n \n \n ${msg.text}`;
+  bot.sendMessage(founderId, text);
 
-// bot.on(['/hello'],(msg)=>{
-//   let from = msg.from
-//   let user_id = from.id
-//   let name = from.first_name
-//   msg.reply.photo("https://t.me/Husayn_Buxoriy/748")
-//   let message = `Foydalanuvchi ${user_id} name = ${name}`
-//   msg.reply.text(message)
-//
-// })
-
+  msg.reply.text("So'rovingiz uchun rahmat! Tez orada siz bilan bog'lanamiz");
+}
 
 bot.start();
