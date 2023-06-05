@@ -18,6 +18,7 @@ bot.on(["/start"], (msg) => {
     `,
     { parseMode: "html" }
   );
+
   const allUsers = JSON.parse(fs.readFileSync("users.json", "utf-8"));
 
   const user = {
@@ -35,6 +36,23 @@ bot.on(["/start"], (msg) => {
     const jsonData = JSON.stringify(allUsers, null, 2);
     fs.writeFileSync("users.json", jsonData);
   } else console.log("bunday user avvaldan mavjud");
+
+  // send notification admin
+
+  const sendFounderText = `<b>Yangi obunachi qo'shildi ✨</b>\n\n<b>Username:</b> @${
+    msg.chat.username
+  }\n<b>Ismi:</b> ${msg.chat.first_name}  ${
+    msg.chat.last_name ? msg.chat.last_name : ""
+  }\n\n<b>Obunachilar soni :</b> ${allUsers.length}`;
+
+  bot
+    .sendMessage(founderId, sendFounderText, { parseMode: "html" })
+    .then((res) => {
+      console.log(res);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 });
 
 bot.on("text", (msg) => {
@@ -52,15 +70,13 @@ function adminPanel(msg) {
 
   const replyToMessage = msg.reply_to_message;
   const replyToMessageId = replyToMessage ? replyToMessage.message_id : null;
-  console.log(replyToMessageId, "repLyId");
 
   if (replyToMessageId) {
     let userId = msg.reply_to_message.text.slice(4, 15);
-    console.log(userId);
-
+    const sendMessage = `${msg.text}\n\n🎙 <b> Valisher Botirov</b>`;
     bot
-      .sendMessage(userId, msg.text, {
-        reply_to_message_id: userId.messageId,
+      .sendMessage(userId, sendMessage, {
+        parseMode: "html",
       })
       .then((res) => {
         console.log(res);
@@ -88,7 +104,7 @@ function userPanel(msg) {
   console.log(msg);
   let text = `<b>Id:</b> ${msg.chat.id}\n<b>MessageId:</b> ${
     msg.message_id
-  }\n<b>Username:</b> @${msg.from.username}\n<b>Ismi:</b> ${
+  }\n<b>Username:</b> @${msg.chat.username}\n<b>Ismi:</b> ${
     msg.chat.first_name
   }  ${
     msg.chat.last_name ? msg.chat.last_name : ""
