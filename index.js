@@ -55,7 +55,7 @@ bot.on(["/start"], (msg) => {
     });
 });
 
-bot.on("text", (msg) => {
+bot.on(["text", "photo", "audio", "document", "video"], (msg) => {
   if (msg.text != "/start") {
     if (msg.chat.id == founderId) {
       adminPanel(msg);
@@ -72,7 +72,13 @@ function adminPanel(msg) {
   const replyToMessageId = replyToMessage ? replyToMessage.message_id : null;
 
   if (replyToMessageId) {
-    let userId = msg.reply_to_message.text.slice(4, 15);
+    let userId = null;
+    if (msg.reply_to_message.photo.length) {
+      userId = msg.reply_to_message.caption.slice(4, 15);
+      console.log(userId, "images id");
+    } else {
+      userId = msg.reply_to_message.text.slice(4, 15);
+    }
     const sendMessage = `${msg.text}\n\n🎙 <b> Valisher Botirov</b>`;
     bot
       .sendMessage(userId, sendMessage, {
@@ -110,6 +116,16 @@ function userPanel(msg) {
     msg.chat.last_name ? msg.chat.last_name : ""
   } \n\n <i>Yuborgan xabari:</i>\n\n ${msg.text}`;
   bot.sendMessage(founderId, text, { parseMode: "html" });
+
+  if (msg?.photo?.length) {
+    const photo = msg.photo;
+    const caption = msg.caption ? msg.caption : "";
+    const captionId = `<b>Id:</b> ${msg.chat.id}\n\n${caption}`;
+    bot.sendPhoto(founderId, photo[photo.length - 1].file_id, {
+      caption: captionId,
+      parseMode: "html",
+    });
+  }
 
   msg.reply.text(
     "So'rovingiz uchun rahmat! Tez orada siz bilan bog'lanamiz\n\n🎤 <b>MurojatBot</b>",
