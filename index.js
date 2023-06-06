@@ -55,7 +55,7 @@ bot.on(["/start"], (msg) => {
     });
 });
 
-bot.on(["text", "photo", "audio", "document", "video"], (msg) => {
+bot.on(["text", "photo"], (msg) => {
   if (msg.text != "/start") {
     if (msg.chat.id == founderId) {
       adminPanel(msg);
@@ -151,10 +151,17 @@ function userPanel(msg) {
     const photo = msg.photo;
     const caption = msg.caption ? msg.caption : "";
     const captionId = `<b>Id:</b> ${msg.chat.id}\n<b>MessageId:</b> ${msg.message_id}\n\n${caption}`;
-    bot.sendPhoto(founderId, photo[photo.length - 1].file_id, {
-      caption: captionId,
-      parseMode: "html",
-    });
+    bot
+      .sendPhoto(founderId, photo[photo.length - 1].file_id, {
+        caption: captionId,
+        parseMode: "html",
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   } else {
     let text = `<b>Id:</b> ${msg.chat.id}\n<b>MessageId:</b> ${
       msg.message_id
@@ -163,7 +170,14 @@ function userPanel(msg) {
     }  ${
       msg.chat.last_name ? msg.chat.last_name : ""
     } \n\n <i>Yuborgan xabari:</i>\n\n ${msg.text}`;
-    bot.sendMessage(founderId, text, { parseMode: "html" });
+    bot
+      .sendMessage(founderId, text, { parseMode: "html" })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   msg.reply.text(
