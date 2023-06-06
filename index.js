@@ -68,63 +68,102 @@ bot.on(["text", "photo", "audio", "document", "video"], (msg) => {
 function adminPanel(msg) {
   console.log(msg);
 
+  const users = JSON.parse(fs.readFileSync("users.json"));
+
   const replyToMessage = msg.reply_to_message;
   const replyToMessageId = replyToMessage ? replyToMessage.message_id : null;
 
   if (replyToMessageId) {
-    let userId = null;
-    if (msg.reply_to_message.photo.length) {
-      userId = msg.reply_to_message.caption.slice(4, 15);
-      console.log(userId, "images id");
+    let userId = msg?.reply_to_message?.caption
+      ? msg.reply_to_message?.caption?.slice(4, 15)
+      : msg.reply_to_message?.text?.slice(4, 15);
+    let messageId = msg?.reply_to_message?.caption
+      ? msg.reply_to_message?.caption?.slice(26, 30)
+      : msg.reply_to_message?.text?.slice(26, 30);
+
+    if (msg?.photo?.length) {
+      const photo = msg.photo;
+      const caption = msg.caption;
+      bot
+        .sendPhoto(userId, photo[photo.length - 1].file_id, {
+          caption: caption,
+          replyToMessage: messageId,
+        })
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     } else {
-      userId = msg.reply_to_message.text.slice(4, 15);
+      const sendMessage = `${msg.text}\n\n🎙 <b> Valisher Botirov</b>`;
+      bot
+        .sendMessage(userId, sendMessage, {
+          parseMode: "html",
+          replyToMessage: messageId,
+        })
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
-    const sendMessage = `${msg.text}\n\n🎙 <b> Valisher Botirov</b>`;
-    bot
-      .sendMessage(userId, sendMessage, {
-        parseMode: "html",
-      })
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
   }
 
   // hamma userga birder xabar jo'natish uchun cod
 
-  // users.forEach((user) => {
-  //   bot
-  //     .sendMessage(user.userId, msg.text)
-  //     .then((res) => {
-  //       console.log(res);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     });
-  // });
+  if (!msg.reply_to_message?.message_id) {
+    users.forEach((user) => {
+      if (msg?.photo?.length) {
+        const caption = msg.caption;
+        const photo = msg.photo;
+        bot
+          .sendPhoto(user.userId, photo[photo.length - 1].file_id, {
+            caption: caption,
+          })
+          .then((res) => {
+            console.log(res);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      } else {
+        bot
+          .sendMessage(user.userId, msg.text, {
+            parseMode: "html",
+          })
+          .then((res) => {
+            console.log(res);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+    });
+  }
 }
 
 function userPanel(msg) {
   console.log(msg);
-  let text = `<b>Id:</b> ${msg.chat.id}\n<b>MessageId:</b> ${
-    msg.message_id
-  }\n<b>Username:</b> @${msg.chat.username}\n<b>Ismi:</b> ${
-    msg.chat.first_name
-  }  ${
-    msg.chat.last_name ? msg.chat.last_name : ""
-  } \n\n <i>Yuborgan xabari:</i>\n\n ${msg.text}`;
-  bot.sendMessage(founderId, text, { parseMode: "html" });
 
   if (msg?.photo?.length) {
     const photo = msg.photo;
     const caption = msg.caption ? msg.caption : "";
-    const captionId = `<b>Id:</b> ${msg.chat.id}\n\n${caption}`;
+    const captionId = `<b>Id:</b> ${msg.chat.id}\n<b>MessageId:</b> ${msg.message_id}\n\n${caption}`;
     bot.sendPhoto(founderId, photo[photo.length - 1].file_id, {
       caption: captionId,
       parseMode: "html",
     });
+  } else {
+    let text = `<b>Id:</b> ${msg.chat.id}\n<b>MessageId:</b> ${
+      msg.message_id
+    }\n<b>Username:</b> @${msg.chat.username}\n<b>Ismi:</b> ${
+      msg.chat.first_name
+    }  ${
+      msg.chat.last_name ? msg.chat.last_name : ""
+    } \n\n <i>Yuborgan xabari:</i>\n\n ${msg.text}`;
+    bot.sendMessage(founderId, text, { parseMode: "html" });
   }
 
   msg.reply.text(
@@ -134,3 +173,5 @@ function userPanel(msg) {
 }
 
 bot.start();
+
+// fid 5171082791
